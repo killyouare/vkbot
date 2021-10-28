@@ -1,13 +1,13 @@
 request_schedule_url_a = None##Take request from dnevnik ru
 auth_a = {
-    "login": None,##ur login
-    "password": None,##ur password
+    "login": None,##A group login
+    "password": None,##A group password
 }
 
 request_schedule_url_b = None##Take request from dnevnik ru
 auth_b = {
-    "login": None,##ur login
-    "password": None,##ur password
+    "login": None,##B group login
+    "password": None,##B group password
 }
 
 
