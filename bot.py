@@ -158,8 +158,8 @@ async def reload(message: Message):
 
     intTomorrow = int(tomorrow.strftime("%s")) + 25200
     schedule = f"""Расписание на {day_dict[dt.datetime.weekday(tomorrow)]} {tomorrow.day} {month_dict[tomorrow.month]}\n\n"""
-    a = get_schedule(1635552000, auth_a, request_schedule_url_a)
-    b = get_schedule(1635552000, auth_b, request_schedule_url_b)
+    a = get_schedule(intTomorrow, auth_a, request_schedule_url_a)
+    b = get_schedule(intTomorrow, auth_b, request_schedule_url_b)
     check_equality(a, b)
 
     await message.answer("Обновил текст")
