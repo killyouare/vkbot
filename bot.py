@@ -34,7 +34,6 @@ day_dict = {
 }
 
 schedule = None
-user_list = []
 
 
 # Получить расписание ##################################################################################################
@@ -76,8 +75,9 @@ def get_txt(lesson):
             start_time = elem['hours']['startHour'] + ":" + elem['hours']['startMinute']  # Время начала пары
             end_time = elem['hours']['endHour'] + ":" + elem['hours']['endMinute']  # Время конца пары
             subject = elem['subject']['name']
-            row = f"{number}. {subject}({place}) [{start_time} - {end_time}]"  # Объединяем
-            dict += f"{row}\n"
+            row = f"""{number}. {subject}({place})
+             [{start_time} - {end_time}]"""  # Объединяем
+            dict += f"{row}\n\n"
     return dict
 
 
@@ -95,26 +95,21 @@ def check_equality(a, b):
 def make_schedule(dict):
     global schedule
     if len(dict) == 1:
-
-        schedule += f"""Общее расписание
-        
+        schedule += f"""Общее расписание\n\n
 {dict[0]}"""
     else:
-        schedule += f"""Группа А
+        schedule += f"""Группа А\n\n
+{dict[0]}\n\n
+Группа Б\n\n
+{dict[1]}"""
 
-{dict[0]}
-
-Группа Б
-
-{dict[1]}
-"""
     print(schedule)
 
 
 ########################################################################################################################
 
 
-bot = Bot(token=Token)
+bot = Bot(token=TOKEN)
 
 # Пользовательская клавиатура
 keyboard_user = (
@@ -147,10 +142,11 @@ keyboard_admin = (
 
 @bot.on.private_message(payload={"button": 1})
 async def mailing(message: Message):
-    global schedule, user_list
-    await bot.api.messages.send(peer_ids=user_list, message=schedule, random_id=0)
+    global schedule
+    global USER_LIST
+    await bot.api.messages.send(peer_ids=USER_LIST, message=schedule, random_id=0)
 
-
+####################################################
 @bot.on.private_message(payload={"button": 2})
 async def reload(message: Message):
     await bot.api.messages.set_activity(message.peer_id, "typing")
@@ -161,11 +157,9 @@ async def reload(message: Message):
         tomorrow += dt.timedelta(days=1)
 
     intTomorrow = int(tomorrow.strftime("%s")) + 25200
-    schedule = f"""Расписание на  {day_dict[dt.datetime.weekday(tomorrow)]}   {tomorrow}
-
-"""
-    a = get_schedule(intTomorrow, auth_a, request_schedule_url_a)
-    b = get_schedule(intTomorrow, auth_b, request_schedule_url_b)
+    schedule = f"""Расписание на {day_dict[dt.datetime.weekday(tomorrow)]} {tomorrow.day} {month_dict[tomorrow.month]}\n\n"""
+    a = get_schedule(1635552000, auth_a, request_schedule_url_a)
+    b = get_schedule(1635552000, auth_b, request_schedule_url_b)
     check_equality(a, b)
 
     await message.answer("Обновил текст")
