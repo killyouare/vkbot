@@ -16,5 +16,3 @@ auth_b = {
 TOKEN = ""  # vkbot token
 LINK = ""  # link to dialog with bot
 ADMIN_ID = []  # vk ids who can send schedule
-
-USER_LIST = []  # users who take schedule
