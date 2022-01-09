@@ -4,3 +4,5 @@ install:
     pip3 install vkbottle
 
 add ur data to const
+
+xd
