@@ -121,7 +121,6 @@ keyboard_user = (
 )
 keyboard_auth = (
     Keyboard(one_time=False, inline=False)
-
         .add(Text("Расписание", payload={"command": 3}), color=KeyboardButtonColor.PRIMARY)
         .row()
         .add(Text("Отключить рассылку", payload={"command": 3}), color=KeyboardButtonColor.PRIMARY)
@@ -158,8 +157,8 @@ async def reload(message: Message):
 
     intTomorrow = int(tomorrow.strftime("%s")) + 25200
     schedule = f"""Расписание на {day_dict[dt.datetime.weekday(tomorrow)]} {tomorrow.day} {month_dict[tomorrow.month]}\n\n"""
-    a = get_schedule(1635552000, auth_a, request_schedule_url_a)
-    b = get_schedule(1635552000, auth_b, request_schedule_url_b)
+    a = get_schedule(intTomorrow, auth_a, request_schedule_url_a)
+    b = get_schedule(intTomorrow, auth_b, request_schedule_url_b)
     check_equality(a, b)
 
     await message.answer("Обновил текст")
@@ -176,13 +175,16 @@ async def send_schedule(message: Message):
 ###############################################################################################
 @bot.on.private_message(text=['Рассылка', 'рассылка'])
 async def reg(message: Message):
-    global user_list
+    with open('userList.json') as f:
+        user_list = json.load(f)
     if message.peer_id in ADMIN_ID:
         await message.answer('Ты меня не троль', keyboard=keyboard_admin)
     elif message.peer_id in user_list:
         await message.answer("У вас уже подключена рассылка", keyboard=keyboard_auth)
     else:
         user_list.append(message.peer_id)
+        with open('userList.json', 'w') as f:
+            json.dump(user_list, f)
         await message.answer("Вам подключена рассылка", keyboard=keyboard_auth)
 
 
@@ -190,12 +192,15 @@ async def reg(message: Message):
 @bot.on.private_message(text=['Отключить рассылку', 'отключить рассылку', 'отключить'])
 async def reg(message: Message):
     await bot.api.messages.set_activity(message.peer_id, "typing")
-    global user_list
+    with open('userList.json') as f:
+        user_list = json.load(f)
 
     if message.peer_id in ADMIN_ID:
         await message.answer('Ты меня не троль', keyboard=keyboard_admin)
     elif message.peer_id in user_list:
         user_list.remove(message.peer_id)
+        with open('userList.json', 'w') as f:
+            json.dump(user_list, f)
         await message.answer("Вы отключили рассылку", keyboard=keyboard_user)
     else:
         await message.answer("У вас не было рассылки", keyboard=keyboard_user)
@@ -205,13 +210,14 @@ async def reg(message: Message):
 @bot.on.private_message()
 async def reg(message: Message):
     await bot.api.messages.set_activity(message.peer_id, "typing")
-    global user_list
+    with open('userList.json') as f:
+        user_list = json.load(f)
     if message.peer_id in ADMIN_ID:
-        await message.answer('''Приветствую, хозяин''', keyboard=keyboard_admin)
+        await message.answer('Приветствую, хозяин', keyboard=keyboard_admin)
     elif message.peer_id in user_list:
-        await message.answer("da", keyboard=keyboard_auth)
+        await message.answer("Привет, подпесчек", keyboard=keyboard_auth)
     else:
-        await message.answer("da", keyboard=keyboard_user)
+        await message.answer("Привет, зайка", keyboard=keyboard_user)
 
 
 ###############################################################################################
