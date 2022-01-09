@@ -8,34 +8,6 @@ from vkbottle.bot import Message
 
 from const import *
 
-# Словарь для перевода числа в месяц
-month_dict = {
-    1: 'января',
-    2: 'февраля',
-    3: 'марта',
-    4: 'апреля',
-    5: 'мая',
-    6: 'июня',
-    7: 'июля',
-    8: 'августа',
-    9: 'сентября',
-    10: 'октября',
-    11: 'ноября',
-    12: 'декабря'
-}
-
-day_dict = {
-    0: "Пн",
-    1: "Вт",
-    2: "Ср",
-    3: "Чт",
-    4: "Пт",
-    5: "Сб",
-}
-
-schedule = None
-
-
 # Получить расписание ##################################################################################################
 def get_schedule(date, auth, request):
     # Авторизация на сайте (адрес страницы, параметры юзер агента, логин и пароль)
@@ -103,7 +75,6 @@ def make_schedule(dict):
 Группа Б\n\n
 {dict[1]}"""
 
-    print(schedule)
 
 
 ########################################################################################################################
@@ -142,26 +113,33 @@ keyboard_admin = (
 @bot.on.private_message(payload={"button": 1})
 async def mailing(message: Message):
     global schedule
-    global USER_LIST
-    await bot.api.messages.send(peer_ids=USER_LIST, message=schedule, random_id=0)
+    try:
+        with open('userList.json') as f:
+            user_list = json.load(f)
+        await bot.api.messages.send(peer_ids=user_list, message=schedule, random_id=0)
+    except:
+        await message.answer('Вы еще не загрузили расписание')
+
 
 ####################################################
 @bot.on.private_message(payload={"button": 2})
 async def reload(message: Message):
     await bot.api.messages.set_activity(message.peer_id, "typing")
-
     global schedule
     tomorrow = dt.datetime.now().date() + dt.timedelta(days=1)
-    if dt.datetime.weekday(tomorrow) == 6:
-        tomorrow += dt.timedelta(days=1)
+    try:
+        if dt.datetime.weekday(tomorrow) == 6:
+            tomorrow += dt.timedelta(days=1)
 
-    intTomorrow = int(tomorrow.strftime("%s")) + 25200
-    schedule = f"""Расписание на {day_dict[dt.datetime.weekday(tomorrow)]} {tomorrow.day} {month_dict[tomorrow.month]}\n\n"""
-    a = get_schedule(intTomorrow, auth_a, request_schedule_url_a)
-    b = get_schedule(intTomorrow, auth_b, request_schedule_url_b)
-    check_equality(a, b)
+        intTomorrow = int(tomorrow.strftime("%s")) + 25200
+        a = get_schedule(intTomorrow, auth_a, request_schedule_url_a)
+        b = get_schedule(intTomorrow, auth_b, request_schedule_url_b)
+        schedule = f"""Расписание на {day_dict[dt.datetime.weekday(tomorrow)]} {tomorrow.day} {month_dict[tomorrow.month]}\n\n"""
+        check_equality(a, b)
 
-    await message.answer("Обновил текст")
+        await message.answer("Обновил текст")
+    except:
+        await message.answer(f'Расписание на {day_dict[dt.datetime.weekday(tomorrow)]} {tomorrow.day} {month_dict[tomorrow.month]} еще не существует')
 
 
 #############################################################################
@@ -169,7 +147,10 @@ async def reload(message: Message):
 async def send_schedule(message: Message):
     await bot.api.messages.set_activity(message.peer_id, "typing")
     global schedule
-    await message.answer(schedule)
+    try:
+        await message.answer(schedule)
+    except:
+        await message.answer('Расписание пока не загрузили')
 
 
 ###############################################################################################
