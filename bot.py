@@ -8,6 +8,7 @@ from vkbottle.bot import Message
 
 from const import *
 
+
 # Получить расписание ##################################################################################################
 def get_schedule(date, auth, request):
     # Авторизация на сайте (адрес страницы, параметры юзер агента, логин и пароль)
@@ -68,13 +69,12 @@ def make_schedule(dict):
     global schedule
     if len(dict) == 1:
         schedule += f"""Общее расписание\n\n
-{dict[0]}"""
+{dict}"""
     else:
         schedule += f"""Группа А\n\n
 {dict[0]}\n\n
 Группа Б\n\n
 {dict[1]}"""
-
 
 
 ########################################################################################################################
@@ -112,10 +112,8 @@ keyboard_admin = (
 
 @bot.on.private_message(payload={"button": 1})
 async def mailing(message: Message):
-    global schedule
+    global schedule, user_list
     try:
-        with open('userList.json') as f:
-            user_list = json.load(f)
         await bot.api.messages.send(peer_ids=user_list, message=schedule, random_id=0)
     except:
         await message.answer('Вы еще не загрузили расписание')
@@ -139,7 +137,8 @@ async def reload(message: Message):
 
         await message.answer("Обновил текст")
     except:
-        await message.answer(f'Расписание на {day_dict[dt.datetime.weekday(tomorrow)]} {tomorrow.day} {month_dict[tomorrow.month]} еще не существует')
+        await message.answer(
+            f'Расписание на {day_dict[dt.datetime.weekday(tomorrow)]} {tomorrow.day} {month_dict[tomorrow.month]} еще не существует')
 
 
 #############################################################################
@@ -155,9 +154,8 @@ async def send_schedule(message: Message):
 
 ###############################################################################################
 @bot.on.private_message(text=['Рассылка', 'рассылка'])
-async def reg(message: Message):
-    with open('userList.json') as f:
-        user_list = json.load(f)
+async def sub(message: Message):
+    global user_list
     if message.peer_id in ADMIN_ID:
         await message.answer('Ты меня не троль', keyboard=keyboard_admin)
     elif message.peer_id in user_list:
@@ -171,11 +169,9 @@ async def reg(message: Message):
 
 ###############################################################################################
 @bot.on.private_message(text=['Отключить рассылку', 'отключить рассылку', 'отключить'])
-async def reg(message: Message):
+async def unsub(message: Message):
     await bot.api.messages.set_activity(message.peer_id, "typing")
-    with open('userList.json') as f:
-        user_list = json.load(f)
-
+    global user_list
     if message.peer_id in ADMIN_ID:
         await message.answer('Ты меня не троль', keyboard=keyboard_admin)
     elif message.peer_id in user_list:
@@ -189,10 +185,9 @@ async def reg(message: Message):
 
 ###############################################################################################
 @bot.on.private_message()
-async def reg(message: Message):
+async def asw(message: Message):
     await bot.api.messages.set_activity(message.peer_id, "typing")
-    with open('userList.json') as f:
-        user_list = json.load(f)
+    global user_list
     if message.peer_id in ADMIN_ID:
         await message.answer('Приветствую, хозяин', keyboard=keyboard_admin)
     elif message.peer_id in user_list:

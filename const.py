@@ -1,4 +1,3 @@
-
 request_schedule_url_a = "https://dnevnik.ru/api/userfeed/persons/1000016690040/schools/1000008291793/groups" \
                          "/1847065517303242479/schedule? "  # request link like that(ctrl + shift + i -> network ->
 # choose schedule -> take request link)
@@ -17,6 +16,7 @@ auth_b = {
 TOKEN = "example"  # vkbot token
 LINK = "example"  # link to dialog with bot
 ADMIN_ID = []  # vk ids who can send schedule
+
 
 # don`t touch this
 month_dict = {
@@ -44,3 +44,7 @@ day_dict = {
 }
 
 schedule = None
+from json import load
+
+with open('userList.json') as f:
+    user_list = load(f)
