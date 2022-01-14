@@ -1,5 +1,5 @@
 request_schedule_url_a = "https://dnevnik.ru/api/userfeed/persons/1000016690040/schools/1000008291793/groups" \
-                         "/1847065517303242479/schedule? "  # request link like that(ctrl + shift + i -> network ->
+                         "/1847065517303242479/schedule?"  # request link like that(ctrl + shift + i -> network ->
 # choose schedule -> take request link)
 auth_a = {
     "login": "example",  # login A group account
@@ -7,7 +7,7 @@ auth_a = {
 }
 
 request_schedule_url_b = "https://dnevnik.ru/api/userfeed/persons/1000016690052/schools/1000008291793/groups" \
-                         "/1847065517303242479/schedule? "  # like upper guide
+                         "/1847065517303242479/schedule?"  # like upper guide
 auth_b = {
     "login": "example",  # login B group account
     "password": "example"  # password B group account

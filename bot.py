@@ -20,7 +20,7 @@ def get_schedule(date, auth, request):
     }
 
     s = requests.Session()  # Создаем объект сессии
-    s.post(url, data=auth, headers=header)  # Отправляем запрос на авторизацию группа А
+    s.post(url, data=auth, headers=header)  # Отправляем запрос на авторизацию
 
     # Указываем запрос и параметры к запросу
 
@@ -32,15 +32,14 @@ def get_schedule(date, auth, request):
     schedule_dict = json.loads(s.get(request, params=params).text)  # Получаем расписание по запросу
     lesson = schedule_dict['days'][0]['lessons']  # Отрезаем список уроков
 
-    return get_txt(lesson)
+    return get_txt(lesson, request, s)
 
 
 ###################
-def get_txt(lesson):
+def get_txt(lesson, req, session):
     dict = ''
     for elem in lesson:
         if elem['id'] == '0' or elem["isCanceled"] == True:
-
             continue
         else:  # Проходимся по всему списку с данными уроков
             number = elem['number']  # Номер занятия
@@ -48,7 +47,10 @@ def get_txt(lesson):
             start_time = elem['hours']['startHour'] + ":" + elem['hours']['startMinute']  # Время начала пары
             end_time = elem['hours']['endHour'] + ":" + elem['hours']['endMinute']  # Время конца пары
             subject = elem['subject']['name']
+            request = req[:54] + req[76:103] + 'lessons/' + elem['id']
+            teacher = (json.loads(session.get(request).text))['teacher']
             row = f"""{number}. {subject}({place})
+            {teacher['lastName']} {teacher['firstName']} {teacher['middleName']}
              [{start_time} - {end_time}]"""  # Объединяем
             dict += f"{row}\n\n"
     return dict
@@ -69,7 +71,7 @@ def make_schedule(dict):
     global schedule
     if len(dict) == 1:
         schedule += f"""Общее расписание\n\n
-{dict}"""
+{dict[0]}"""
     else:
         schedule += f"""Группа А\n\n
 {dict[0]}\n\n
