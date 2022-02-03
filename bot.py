@@ -43,10 +43,18 @@ def get_txt(lesson, req, session):
             continue
         else:  # Проходимся по всему списку с данными уроков
             number = elem['number']  # Номер занятия
-            place = elem['place']  # Кабинет
             start_time = elem['hours']['startHour'] + ":" + elem['hours']['startMinute']  # Время начала пары
             end_time = elem['hours']['endHour'] + ":" + elem['hours']['endMinute']  # Время конца пары
             subject = elem['subject']['name']
+            place = elem['place']
+            if subject == "Физ. культура":
+                global params, weather
+                s = requests.Session()
+                w = list(filter(lambda x: x['dt'] == tommorowUnix() + int(elem['hours']['startHour']) * 3600,
+                                (json.loads(s.get(weather, params=params).text))['hourly']))
+                if w['feels_like'] > -20 & w['feels_like'] < 0:
+                    place = 'Улица'
+
             request = req[:54] + req[76:103] + 'lessons/' + elem['id']
             teacher = (json.loads(session.get(request).text))['teacher']
             row = f"""{number}. {subject}({place})
@@ -68,7 +76,8 @@ def check_equality(a, b):
 
 
 def make_schedule(dict):
-    global schedule
+    global schedule, tomorrow
+    schedule = f"""Расписание на {day_dict[dt.datetime.weekday(tomorrow)]} {tomorrow.day} {month_dict[tomorrow.month]}\n\n"""
     if len(dict) == 1:
         schedule += f"""Общее расписание\n\n
 {dict[0]}"""
@@ -77,6 +86,14 @@ def make_schedule(dict):
 {dict[0]}\n\n
 Группа Б\n\n
 {dict[1]}"""
+
+
+def tommorowUnix():
+    global tomorrow
+    tomorrow = dt.datetime.now().date() + dt.timedelta(days=1)
+    if dt.datetime.weekday(tomorrow) == 6:
+        tomorrow += dt.timedelta(days=1)
+    return int(tomorrow.strftime("%s"))
 
 
 ########################################################################################################################
@@ -126,17 +143,11 @@ async def mailing(message: Message):
 async def reload(message: Message):
     await bot.api.messages.set_activity(message.peer_id, "typing")
     global schedule
-    tomorrow = dt.datetime.now().date() + dt.timedelta(days=1)
     try:
-        if dt.datetime.weekday(tomorrow) == 6:
-            tomorrow += dt.timedelta(days=1)
-
-        intTomorrow = int(tomorrow.strftime("%s")) + 25200
+        intTomorrow = tommorowUnix() + 25200
         a = get_schedule(intTomorrow, auth_a, request_schedule_url_a)
         b = get_schedule(intTomorrow, auth_b, request_schedule_url_b)
-        schedule = f"""Расписание на {day_dict[dt.datetime.weekday(tomorrow)]} {tomorrow.day} {month_dict[tomorrow.month]}\n\n"""
         check_equality(a, b)
-
         await message.answer("Обновил текст")
     except:
         await message.answer(

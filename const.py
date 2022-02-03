@@ -17,7 +17,15 @@ TOKEN = "example"  # vkbot token
 LINK = "example"  # link to dialog with bot
 ADMIN_ID = []  # vk ids who can send schedule
 
-
+weather = 'https://api.openweathermap.org/data/2.5/onecall?'
+params = {
+    'appid': 'example', #openweathermap token
+    'lat':  56.49771, #Tomsk coordinates 
+    'lon':  84.97437,
+    'exclude':'daily', #24h forecast
+    'units':'metric', #Celsius
+    'lang':'ru' 
+}
 # don`t touch this
 month_dict = {
     1: 'января',
@@ -44,6 +52,8 @@ day_dict = {
 }
 
 schedule = None
+tomorrow = None
+
 from json import load
 
 with open('userList.json') as f:
